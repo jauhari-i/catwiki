@@ -51,8 +51,9 @@ router.get('/breeds/:name', async (req, res) => {
   });
 });
 
-router.get('/cat', async (req, res) => {
+router.get('/cat/:limit', async (req, res) => {
   try {
+    const limit = req.params.limit
     const data = await axios.get(`${baseUrl}/breeds`, config);
     if (!data.data) {
       res.status(500).json({
@@ -81,6 +82,13 @@ router.get('/cat', async (req, res) => {
         const sortedBreed = breedPopularity.sort(
           (a, b) => parseFloat(b.search) - parseFloat(a.search)
         );
+        if(limit){
+          const limitedData = sortedBreed.slice(0, limit)
+          return res.status(200).json({
+          data: limitedData,
+          message: 'Get breed popluarity success',
+        });
+        }
         return res.status(200).json({
           data: sortedBreed,
           message: 'Get breed popluarity success',
