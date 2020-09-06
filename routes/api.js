@@ -65,11 +65,27 @@ router.get('/cat', async (req, res) => {
       id: p.catId,
       search: p.search,
     }));
-    const breedPopularity = breedData.map((item, idx) => Object.assign({}, item, catData[idx]));
-    const sortedBreed = breedPopularity.sort((a, b) => parseFloat(b.search) - parseFloat(a.search));
-    res.status(200).json({
-      data: sortedBreed,
-      message: 'Get breed popluarity success',
+    let catDataWithImg = [];
+    catData.map(async (item, i) => {
+      const dataImg = await axios.get(`${baseUrl}/images/search?breed_id=${item.id}`, config);
+      const img = dataImg.data[0].url;
+      catDataWithImg.push({
+        id: item.id,
+        search: item.search,
+        img: img,
+      });
+      if (catDataWithImg.length === catData.length) {
+        const breedPopularity = breedData.map((item, idx) =>
+          Object.assign({}, item, catDataWithImg[idx])
+        );
+        const sortedBreed = breedPopularity.sort(
+          (a, b) => parseFloat(b.search) - parseFloat(a.search)
+        );
+        return res.status(200).json({
+          data: sortedBreed,
+          message: 'Get breed popluarity success',
+        });
+      }
     });
   } catch (error) {
     res.status(500).json({
