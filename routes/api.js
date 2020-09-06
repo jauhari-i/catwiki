@@ -34,16 +34,18 @@ router.get('/breeds', async (req, res) => {
 router.get('/breeds/:name', async (req, res) => {
   const name = req.params.name;
   const data = await axios.get(`${baseUrl}/breeds/${name}`, config);
+  const dataImg = await axios.get(`${baseUrl}/images/search?breed_id=${name}`, config);
   if (!data.data) {
     res.status(500).json({
       message: 'Failed to fetch data, internal server error',
     });
   }
+  const img = dataImg.data[0].url;
   const catNow = await Cats.findOne({ catId: name });
   const updatePop = await Cats.updateOne({ catId: name }, { search: catNow.search + 1 });
   const dataBreed = data.data;
   res.status(200).json({
-    data: dataBreed,
+    data: { breed: dataBreed, img },
     message: 'Get breed success',
     updated: updatePop.ok,
   });
@@ -75,6 +77,21 @@ router.get('/cat', async (req, res) => {
       message: 'Internal server error',
     });
   }
+});
+
+router.get('/images/:name/:limit', async (req, res) => {
+  const name = req.params.name;
+  const limit = req.params.limit;
+  const data = await axios.get(`${baseUrl}/images/search?breed_id=${name}&limit=${limit}`, config);
+  if (!data.data) {
+    res.status(500).json({
+      message: 'Failed to fetch data, internal server error',
+    });
+  }
+  res.status(200).json({
+    data: data.data,
+    message: 'Get breed image success',
+  });
 });
 
 module.exports = router;
