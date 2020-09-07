@@ -53,7 +53,7 @@ router.get('/breeds/:name', async (req, res) => {
 
 router.get('/cat/:limit', async (req, res) => {
   try {
-    const limit = req.params.limit
+    const limit = req.params.limit;
     const data = await axios.get(`${baseUrl}/breeds`, config);
     if (!data.data) {
       res.status(500).json({
@@ -76,18 +76,20 @@ router.get('/cat/:limit', async (req, res) => {
         img: img,
       });
       if (catDataWithImg.length === catData.length) {
-        const breedPopularity = breedData.map((item, idx) =>
-          Object.assign({}, item, catDataWithImg[idx])
+        const catDataSorted = catDataWithImg.sort((a, b) => a.id.localeCompare(b.id));
+        const breedDataSorted = breedData.sort((a, b) => a.id.localeCompare(b.id));
+        const breedPopularity = breedDataSorted.map((item, idx) =>
+          Object.assign({}, item, catDataSorted[idx])
         );
         const sortedBreed = breedPopularity.sort(
           (a, b) => parseFloat(b.search) - parseFloat(a.search)
         );
-        if(limit){
-          const limitedData = sortedBreed.slice(0, limit)
+        if (limit) {
+          const limitedData = sortedBreed.slice(0, limit);
           return res.status(200).json({
-          data: limitedData,
-          message: 'Get breed popluarity success',
-        });
+            data: limitedData,
+            message: 'Get breed popluarity success',
+          });
         }
         return res.status(200).json({
           data: sortedBreed,
