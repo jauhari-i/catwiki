@@ -4,6 +4,7 @@ const port = process.env.PORT || 4000;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const log = require('morgan');
+const path = require('path');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -31,11 +32,12 @@ mongoose.connect(
   }
 );
 
-app.get('/', (req, res) => {
-  res.redirect('/api');
-});
-
 app.use('/api', require('./routes/api'));
+
+app.use(express.static(path.join(__dirname, './public')));
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
 
 app.use(function (req, res, next) {
   var err = new Error('Not Found');
